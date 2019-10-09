@@ -1,0 +1,27 @@
+# timestamp | duration | file | instruction | dir | modtime | etag | size | fileId | status | errorString | http result code | other size | other modtime | other etag | other fileId | other instruction
+#=#=#=# Syncrun started 2019-10-07T11:25:59Z
+#=#=#=#=# Propagation starts 2019-10-07T11:26:06Z (last step: 7126 msec, total: 7126 msec)
+||master_thesis_polybox|INST_NEW|Down|1570447436|5d9b2052ee470|0|1635344353508fc14d93fa7|4||0|0|0||||
+||master_thesis_polybox/admin|INST_NEW|Down|1570447428|5d9b20446079a|0|1635348088508fc14d93fa7|4||0|0|0||||
+11:26:06||master_thesis_polybox/admin/MA_documentation_LiWang_0923.docx|INST_NEW|Down|1569398415|902d1ce00a3146bfe115be53176583e9|109648|1635348160508fc14d93fa7|4||0|0|0||||
+||master_thesis_polybox/eawag|INST_NEW|Down|1570447427|5d9b2043e6b9d|0|1635348085508fc14d93fa7|4||0|0|0||||
+11:26:06||master_thesis_polybox/admin/timeline_masterthesis.xlsx|INST_NEW|Down|1569918629|96c12d42f7cb10c0d66822c6b3374359|13532|1635348193508fc14d93fa7|4||0|0|0||||
+11:26:06||master_thesis_polybox/admin/MA_documentation_0925.docx|INST_NEW|Down|1570001400|b5c2bb241f03c4a7264c8e1933ea38bb|111845|1635348151508fc14d93fa7|4||0|0|0||||
+11:26:06||master_thesis_polybox/admin/MA_documentation_liwang.pdf|INST_NEW|Down|1570001393|ccd97588a14281bb4344adef5cb6b725|221472|1635348181508fc14d93fa7|4||0|0|0||||
+11:26:07||master_thesis_polybox/eawag/cv.pdf|INST_NEW|Down|1558167358|43de0871cc7790676aaab9122e79c3e9|45625|1635348118508fc14d93fa7|4||0|0|0||||
+11:26:08||master_thesis_polybox/eawag/personendatenformular_kurz_e_liwang.docx|INST_NEW|Down|1569227597|1e80adec90c6bef50a707b2b8eb36f5f|47186|1635348127508fc14d93fa7|4||0|0|0||||
+11:26:07||master_thesis_polybox/eawag/bachlerdegree.jpg|INST_NEW|Down|1498215940|b3faaa91271e9a161193a34d04c69a0f|578014|1635348142508fc14d93fa7|4||0|0|0||||
+11:26:08||master_thesis_polybox/eawag/personendatenformular_kurz_e_liwang.pdf|INST_NEW|Down|1569227590|715ecb06412e6e729d124a8844d1af4b|261338|1635348124508fc14d93fa7|4||0|0|0||||
+||master_thesis_polybox/literature|INST_NEW|Down|1570447442|5d9b2052ee470|0|1635348469508fc14d93fa7|4||0|0|0||||
+11:26:07||master_thesis_polybox/eawag/passport_permit_enrollmentconfirmation_contract.pdf|INST_NEW|Down|1569224311|557aa1211cf424f86e621fbdc606d0e6|1671062|1635348136508fc14d93fa7|4||0|0|0||||
+11:26:10||master_thesis_polybox/eawag/personnel.pdf|INST_NEW|Down|1569227923|a8d9ff0a28939cdb2a6a3b0bdce2badf|496700|1635348172508fc14d93fa7|4||0|0|0||||
+11:26:12||master_thesis_polybox/literature/automatic differentiation in machine learning.pdf|INST_NEW|Down|1569307416|5b74f76ea1c3533f85b2049a1f649b96|673507|1635348502508fc14d93fa7|4||0|0|0||||
+11:26:14||README.md|INST_NEW|Up|1570446673|bcec85b403c50fe8846cea74ff8df5a0|70|1635355189508fc14d93fa7|4||201|0|0||||
+11:26:14||batch_reactor.jl|INST_NEW|Up|1570445946|eb30a11c13913dcafd37dae7690e1bec|879|1635355183508fc14d93fa7|4||201|0|0||||
+11:26:15||test.jl|INST_NEW|Up|1570445438|6895a8ae014112810e848b62bd4f088a|599|1635355261508fc14d93fa7|4||201|0|0||||
+11:26:10||master_thesis_polybox/literature/a differentiable programming system.pdf|INST_NEW|Down|1569833109|30cbba9017c90fdec2e1bba8f1bd17b9|968623|1635348505508fc14d93fa7|4||0|0|0||||
+11:26:13||master_thesis_polybox/literature/samm_old.pdf|INST_NEW|Down|1570042760|b71fcd59500146a82e1895aea95d58da|27278877|1635348676508fc14d93fa7|4||0|0|0||||
+#=#=#=# Syncrun finished 2019-10-07T11:27:02Z (last step: 56249 msec, total: 63375 msec)
+#=#=#=# Syncrun started 2019-10-07T11:27:14Z
+#=#=#=#=# Propagation starts 2019-10-07T11:27:18Z (last step: 4019 msec, total: 4019 msec)
+#=#=#=# Syncrun finished 2019-10-07T11:27:18Z (last step: 17 msec, total: 4036 msec)
