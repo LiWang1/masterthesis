@@ -16,9 +16,7 @@ end
 # cost function
 function loss(para)
     obs = randomized
-    ## solve model with the new parameter
     solution = solver(random, para)
-    ## run model at time
     L = sum((solution .- obs).^2)
     return (L)
 end
