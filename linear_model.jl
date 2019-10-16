@@ -44,7 +44,7 @@ x0 = [0.0, 0.0, 0.0]
 #res1 = optimize(loss, x0)
 # autodiff
 res2 = optimize(loss, grad!, x0, BFGS())
-res3 = optimize(loss, x0, Newton(); autodiff = :forward)
+#res3 = optimize(loss, x0, Newton(); autodiff = :forward)
 # numerical diff
 #res4 = optimize(loss, x0, BFGS())
 #res5 = optimize(loss, x0, Newton())
