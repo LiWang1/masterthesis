@@ -1,27 +1,40 @@
-# linear model
+# Author: Li WANG
+# Mail: wangli@student.ethz.ch
+#
+#
+# --------------------------------------
+using Pkg
+Pkg.activate(".")
+
+using Optim
+
+# ------------
+# 1) define true model and data generation
 function y(x)
     return y = x[1]+2*x[2]+3*x[3]
 end
+x_obs = randn(2000, 3)
+y_obs = [y(random[i,:]) + randn() for i in 1:2000]
 
-# data generation
-random = randn(2000, 3)
-randomized = [y(random[i,:]) + randn() for i in 1:2000]
-
-## define cost function and optimize
+# 2) define the linear model
 function solver(x, para)
     solution = x*para
     return (solution)
 end
 
-# cost function
+# 3) define the cost function
 function loss(para)
-    obs = randomized
-    solution = solver(random, para)
-    L = sum((solution .- obs).^2)
+    y_est = solver(x_obs, para)
+    L = sum((y_est .- y_obs).^2)
     return (L)
 end
 
-# optimize
+# 4) define the way to calculate the gradients for the cost function
+function ∇loss()
+
+end
+
+# 5) optimize the loss function with diffferent method
 using Optim
 x0 = [0.0, 0.0, 0.0]
 # without gradient
