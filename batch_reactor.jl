@@ -1,7 +1,16 @@
-# used packages
-using DifferentialEquations, Optim
+# ODE model
+# Author: Li WANG
+# Mail: wangli@student.ethz.ch
+#
+#----------------------------------------------
+
+using Pkg
+Pkg.activate(".")
+
+using DifferentialEquations, Optim, ForwardDiff
 
 #batch reactor A + 2B <-> C, example 6.4 of SAMM
+# 1) define the true model and data generation
 function batch(du, u, p, t)
     du[1] = -p[1]*u[1]*u[2]*u[2]+p[2]u[3]
     du[2] = -2*p[1]*u[1]*u[2]*u[2]+2*p[2]*u[3]
@@ -14,39 +23,43 @@ tspan = (0.0, 1.0)
 prob = ODEProblem(batch, u0, tspan, p)
 sol = solve(prob, Tsit5())
 
-## data generation using p=[1.0, 1.0]
-t = range(0, stop=1,length = 2000)
-randomized = [sol(t[i]) + 0.01randn(3) for i in 1:length(t)]
+#data generation using p=[1.0, 1.0]
+x_obs = range(0, stop=1,length = 2000)
+y_obs = [sol(x_obs[i]) + 0.01randn(3) for i in 1:length(x_obs)]
 
-## define cost function and optimize
+# 2) define the model
 function solver(para)
     problem = ODEProblem(batch, u0, tspan, para)
-    solution = solve(problem, Tsit5())
+    _problem = remake(problem;u0=convert.(eltype(para),problem.u0),p=para)
+    solution = solve(_problem, Tsit5())
     return (solution)
 end
 
-# calculate the sum_square
-function sum_sqaure_arr(m)
-    tot = 0.0
-    for i in 1:length(m)
-        tot += m[i]^2
-    end
-    return (tot)
-end
-
-
-# cost function
+# 3) cost function
 function loss(para)
-    ## solve model with the new parameter
     solution = solver(para)
-    ## run model at time
     L = 0.0
-    for i in 1:length(t)
-        L += sum_sqaure_arr(solution(t[i]) - randomized[i])
+    for i in 1:length(x_obs)
+        L += sum((solution(x_obs[i]) .- y_obs[i]).^2)
     end
     return (L)
 end
 
-# optimize
-x0 = [0.0, 0.0]
-res = Optim.optimize(loss, x0)
+# 4) gradient calculation
+
+function grad!(G, para)
+    grad = ForwardDiff.gradient(loss, para)
+    for i in 1:length(para)
+        G[i] = grad[i]
+    end
+end
+
+function hess!(H, para)
+    H = ForwardDiff.hessian(loss, para)
+end
+
+# 5) optimization
+x0 = zeros(length(p))
+res_wt_grad = optimize(loss, x0, iterations = 2000)
+# newton works kind of well in this case 
+res_grad = optimize(loss, x0, Newton(), autodiff = :forward)
