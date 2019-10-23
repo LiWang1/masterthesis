@@ -1,6 +1,6 @@
+# Linear model
 # Author: Li WANG
 # Mail: wangli@student.ethz.ch
-#
 #
 # --------------------------------------------------------------
 using Pkg
@@ -12,7 +12,7 @@ using Optim, ForwardDiff
 # ------------
 # 1) define true model and data generation
 # 1.1) define the number of dimensions
-num_true_para = 100
+num_true_para = 10
 true_para = 1:num_true_para
 # 1.2) data generation for the parameters defined
 y(x::Vector) = transpose(true_para)*x
@@ -44,10 +44,10 @@ end
 # 5) optimize the loss function with diffferent method
 x0 = zeros(num_true_para)
 # without gradient
-#res1 = optimize(loss, x0)
+res1 = optimize(loss, x0, iterations = 2000)
 # autodiff
 res2 = optimize(loss, grad!, x0, BFGS())
 #res3 = optimize(loss, x0, Newton(); autodiff = :forward)
 # numerical diff
-#res4 = optimize(loss, x0, BFGS())
+res4 = optimize(loss, x0, BFGS())
 #res5 = optimize(loss, x0, Newton())
