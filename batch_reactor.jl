@@ -46,23 +46,23 @@ function loss(para)
 end
 
 # 4) gradient calculation
-
 function grad!(G, para)
     grad = ForwardDiff.gradient(loss, para)
     for i in 1:length(para)
         G[i] = grad[i]
     end
 end
-
+# 5) hessian for Newton method 
 function hess!(H, para)
     hess = ForwardDiff.hessian(loss, para)
+    # here needs to be improved...
     H[1, 1] = hess[1, 1]
     H[1, 2] = hess[1, 2]
     H[2, 1] = hess[2, 1]
     H[2, 2] = hess[2, 2]
 end
 
-# 5) optimization
+# 6) optimization
 x0 = zeros(length(p))
 res_wt_grad = optimize(loss, x0, iterations = 2000)
 # newton works kind of well in this case
