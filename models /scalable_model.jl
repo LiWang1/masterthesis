@@ -31,6 +31,8 @@ function test_f(p)
   _prob = remake(prob;u0=convert.(eltype(p),prob.u0),p=p)
   solve(_prob,Vern9(),save_everystep=false)[end]
 end
+
+# loss function
 function loss_nd(para)
     L = sum((test_f(para).- sol[end]).^2)
     return (L)
