@@ -10,6 +10,8 @@ using DifferentialEquations
 using ForwardDiff
 using Calculus
 using ReverseDiff
+using BenchmarkTools
+using Plots
 
 
 # model
@@ -41,6 +43,6 @@ end
 # gradient evaluation
 p2 = [2.5, 2.0, 3.5, 4.0, 5.0, 4.0, 6.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 1.0, 2.0, 3.0]
 
-grad_fad = ForwardDiff.gradient(loss_nd, p2)
-grad_fdm= Calculus.derivative(loss_nd, p2)
-grad_bad = ReverseDiff.gradient(loss_nd, p2)
+@benchmark grad_fad = ForwardDiff.gradient(loss_nd, p2)
+@benchmark grad_fdm= Calculus.derivative(loss_nd, p2)
+@benchmark grad_bad = ReverseDiff.gradient(loss_nd, p2)
