@@ -33,7 +33,7 @@ for j in 1:num_paras
     end
   end
 
-  # Initiate a vec of length = 16
+  # true result 
   p = param_gen
   u0 = u0_gen
   tspan = (0.0,1.0)
