@@ -50,7 +50,7 @@ for j in num_paras
     p2 = param_eval_gen
 
     # gradient
-    println(@benchmark ReverseDiff.gradient(loss, p2))
-    println(@benchmark ForwardDiff.gradient(loss, p2))
-    println(@benchmark Calculus.gradient(loss, p2))
+    println(minimum(@benchmark ReverseDiff.gradient(loss, p2)))
+    println(minimum(@benchmark ForwardDiff.gradient(loss, p2)))
+    println(minimum(@benchmark Calculus.gradient(loss, p2)))
 end

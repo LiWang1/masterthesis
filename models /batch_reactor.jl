@@ -7,12 +7,11 @@
 using Pkg
 Pkg.activate(".")
 
-using DifferentialEquations, Optim, ForwardDiff, FiniteDifferences
-
+using DifferentialEquations, Optim, ForwardDiff, Calculus
 
 #batch reactor A + 2B <-> C, example 6.4 of SAMM
-# 1) define the true model and data generation
-function batch(du, u, p, t)
+# true model and data generation
+function batch(du, u, p, t) # why t???
     du[1] = -p[1]*u[1]*u[2]*u[2]+p[2]u[3]
     du[2] = -2*p[1]*u[1]*u[2]*u[2]+2*p[2]*u[3]
     du[3] = p[1]*u[1]*u[2]*u[2]-p[2]*u[3]
@@ -24,11 +23,10 @@ tspan = (0.0, 1.0)
 prob = ODEProblem(batch, u0, tspan, p)
 sol = solve(prob, Tsit5())
 
-#data generation using p=[1.0, 1.0]
 x_obs = range(0, stop=1,length = 2000)
 y_obs = [sol(x_obs[i]) + 0.01randn(3) for i in 1:length(x_obs)]
 
-# 2) define the model
+# predict 
 function solver(para)
     problem = ODEProblem(batch, u0, tspan, para)
     _problem = remake(problem;u0=convert.(eltype(para),problem.u0),p=para)
@@ -36,7 +34,7 @@ function solver(para)
     return (solution)
 end
 
-# 3) cost function
+# cost function
 function loss(para)
     solution = solver(para)
     L = 0.0
@@ -46,21 +44,23 @@ function loss(para)
     return (L)
 end
 
-# 4.1) gradient calculation with AD
+# gradients from fad
 function grad!(G, para)
     grad = ForwardDiff.gradient(loss, para)
     for i in 1:length(para)
         G[i] = grad[i]
     end
 end
-# Finite difference method  incorrect 
+
+# gradients from fdm
 function grad2!(G, para)
+    grad = Calculus.derivative(loss, para)
     for i in 1:length(para)
-        G[i] = central_fdm(2,1)(loss, para[i])
+        G[i] = grad[i]
     end
 end
 
-# 5) hessian for Newton method
+# hessian from fad
 function hess!(H, para)
     hess = ForwardDiff.hessian(loss, para)
     # here needs to be improved...
@@ -70,9 +70,18 @@ function hess!(H, para)
     H[2, 2] = hess[2, 2]
 end
 
-# 6) optimization
-x0 = zeros(length(p))
-res_wt_grad = optimize(loss, x0, iterations = 2000)
-# newton works kind of well in this case
-#res_grad = optimize(loss, x0, Newton(), autodiff = :forward)
-res_grad = optimize(loss, grad2!, hess!, x0, Newton())
+# hessian from fdm
+function hess2!(H, para)
+    hess = Calculus.hessian(loss, para)
+    H[1, 1] = hess[1, 1]
+    H[1, 2] = hess[1, 2]
+    H[2, 1] = hess[2, 1]
+    H[2, 2] = hess[2, 2]
+end
+
+# optimization
+x0 = zeros(length(p)) #initial guess
+
+@benchmark opt_wt_grad = optimize(loss, x0, iterations = 2000)
+@benchmark opt_fad = optimize(loss, grad!,hess!, x0, Newton())
+@benchmark opt_fdm = optimize(loss, grad2!,hess2!, x0, Newton())
