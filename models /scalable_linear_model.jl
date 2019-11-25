@@ -6,51 +6,41 @@
 using Pkg
 Pkg.activate(".")
 
-using Optim
 using DifferentialEquations
 using ForwardDiff
 using Calculus
 using ReverseDiff
+using Zygote
 using BenchmarkTools
 using DiffEqSensitivity
-using Plots
+
 
 
 # ------------
-num_paras = [1, 10, 100, 1000, 10000]# the number of parameters is num_paras^2
+#define the size
+size_para = 256 #[1, 4, 16, 64, 256, 1024, 4096, 16384]
 
-run_time_fad = Dict()
-run_time_bad = Dict()
-run_time_fdm = Dict()
-run_time_asa = Dict()
+# observation result
+param_gen = rand(size_para)
+param_eval_gen = rand(size_para)
+y(x::Vector) = param_gen'*x
+x_obs = randn(2000, size_para)
+y_obs = [y(x_obs[i,:]) + randn() for i in 1:2000]
 
-for j in num_paras
-    println(j)
-    size_para = j
-    param_gen = rand(size_para)
-    param_eval_gen = rand(size_para)
-    # 1.2) data generation for the parameters defined
-    y(x::Vector) = param_gen'*x
-    x_obs = randn(2000, size_para)
-    y_obs = [y(x_obs[i,:]) + randn() for i in 1:2000]
+# predict with new parameter
+predict_ln(x, para) = x*para
 
-    # predict with new parameter
-    function predict_ln(x, para)
-        solution = x*para
-        return (solution)
-    end
+# loss function
+loss(para) = sum((predict_ln(x_obs, para) .- y_obs).^2)
 
-    # loss function
-    function loss(para)
-        y_est = predict_ln(x_obs, para)
-        L = sum((y_est .- y_obs).^2)
-        return (L)
-    end
+# gradient evaluation
+rt_fad = minimum(@benchmark grad_fad = ForwardDiff.gradient(loss, param_eval_gen))
+rt_fdm = minimum(@benchmark grad_fdm= Calculus.derivative(loss, param_eval_gen))
+rt_bad_r = minimum(@benchmark grad_bad = ReverseDiff.gradient(loss, param_eval_gen))
+rt_bad_z = minimum(@benchmark grad_bad = Zygote.gradient(loss, param_eval_gen))
 
-    p2 = param_eval_gen
 
-    # gradient
-    println(minimum(@benchmark ReverseDiff.gradient(loss, p2)))
-    println(minimum(@benchmark ForwardDiff.gradient(loss, p2)))
-    println(minimum(@benchmark Calculus.gradient(loss, p2)))
-end
+println("fad: ", rt_fad)
+println("bad: ", rt_bad_r)
+println("zyg: ", rt_bad_z)
+println("fdm: ", rt_fdm)
