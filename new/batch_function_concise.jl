@@ -20,9 +20,11 @@ function batchTrain(model, obs_data, Rain, Dry, ann, u_update, tspan, ts, n_itr,
     # re: the structure of the NN
 
     num_batch = length(obs_data)
+
     for i in 1:num_batch
       u_update, p1 = russikon_nn(model, obs_data[i], Rain[i], Dry[i], u_update, p1, re, tspan, ts, n_itr, ps, fig)
     end
+
     # return the final trained parameters
     return u_update, p1
 end
@@ -107,8 +109,7 @@ function russikon_nn(model, carryonFlow, rain, dry, u0, p_ann, re, tspan, ts, n_
 
   if fig==1
     cb()
-    Flux.train!(loss_russikon, params, data, opt) #, cb = cb())
-    cb()
+    Flux.train!(loss_russikon, params, data, opt, cb = cb)
   else
     Flux.train!(loss_russikon, params, data, opt)
   end
@@ -117,7 +118,7 @@ function russikon_nn(model, carryonFlow, rain, dry, u0, p_ann, re, tspan, ts, n_
   return u_update, p_ann
 end
 
-# evalutation
+# evalutation the result
 function russikon_eval(model, carryon, rain, dry, u0, p_ann, re, tspan, ts, ps)
   # model: "original": original conceptual model;
   #        "dry": replace the dfp with NN;
@@ -196,8 +197,14 @@ function russikon_eval(model, carryon, rain, dry, u0, p_ann, re, tspan, ts, ps)
     prob_russikon_infil = ODEProblem(russikon_mix_infil, u0, tspan, p_ann)
     sol = concrete_solve(prob_russikon_infil,Tsit5(),u0, p_ann, saveat=ts; sensealg=TrackerAdjoint())
   end
-  carryonflow = addOverflow(sol)
-  return carryonflow
+  pred = addOverflow(sol)
+
+  r2_pred = r_square(pred, flow_test)
+
+  # visualization and comparison
+  pl = plot(ts, pred, label = "pred")
+  plot!(pl, ts, flow_test, label = "obs")
+  return r2_pred
 end
 
 # add overflow infractures influence
@@ -256,8 +263,8 @@ function batch_sep(type, data, start, endt, num, span, ts)
         interp_ = convert(Array{Float32, 1}, interp_(ts))
         result_[i] = interp_
       elseif type == "rain"
-        interp_(x) = convert(Float32, interp_(x))
-        result_[i] = interp_
+        interp_i(x) = convert(Float32, interp_(x))
+        result_[i] = interp_i
       end
     end
     return result_
@@ -276,4 +283,12 @@ function dry(data, num)
     result[i] = dry
   end
   return result
+end
+
+# R_square
+function r_square(sim, obs)
+  var_tot = sum(abs2, obs.-mean(obs))
+  var_res = sum(abs2, sim - obs)
+  res = 1-var_res/var_tot
+  return res
 end
