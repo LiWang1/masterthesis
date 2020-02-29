@@ -14,9 +14,9 @@ using BenchmarkTools
 using DiffEqSensitivity
 
 #define the size
-size_para = 2 #[1, 2, 4,   8,  16,  32,   64,    128]
+size_para = 64 #[1, 2, 4,   8,  16,  32,   64,    128]
               #[1, 4, 16, 64, 256, 1024, 4096, 16384] number of paras correps to size_para
-
+println("size: ",size_para^2)
 # observation result
 u0 = randn(size_para)
 p = randn(size_para^2)
@@ -29,12 +29,12 @@ function scale_model(du, u, p, t)
 end
 tspan = (0.0,1.0)
 prob = ODEProblem(scale_model,u0,tspan,p)
-sol = solve(prob, Vern9())
+sol = solve(prob, Vern6())
 
 # prediction with new paras
 function test_f(p)
   _prob = remake(prob;u0=convert.(eltype(p),prob.u0),p=p)
-  solve(_prob,Vern9())
+  solve(_prob,Vern6())
 end
 
 # loss function

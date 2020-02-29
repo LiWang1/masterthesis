@@ -31,7 +31,8 @@ p_ori = Float32[       50.0;  50.0;  50.0;  50.0;  50.0;  # k: storage constant
                         3]                                # infiltration L/s
 
 # time span and time steps
-tspan_end = 10075f0  # bug here...
+batch_span = 7                       # 7 days of data
+tspan_end = batch_span*1440f0 - 5f0
 tspan = (0.0f0, tspan_end)
 t = range(tspan[1], tspan[2], length = convert(Int64, floor(tspan_end)))
 
@@ -39,46 +40,52 @@ t = range(tspan[1], tspan[2], length = convert(Int64, floor(tspan_end)))
 u_update = Float32[1.0; 1.0; 1.0; 1.0; 1.0]
 
 # data input
-f_03 = CSV.read("/Users/wangli/Desktop/masterthesis/simdata/carryonflow_all.csv")
-r_03 = CSV.read("/Users/wangli/Desktop/masterthesis/simdata/rain_all.csv")
+f_03 = CSV.read("/Users/wangli/Desktop/masterthesis/simdata/carryonflow_all_cleaned.csv")
+r_03 = CSV.read("/Users/wangli/Desktop/masterthesis/simdata/rain_all_cleaned.csv")
 dwp = CSV.read("/Users/wangli/Desktop/masterthesis/simdata/dwp_L_min_E.csv")
 
 # data batches
 # training
-date_start_train= 20170601
-date_end_train = 20170607
-batch_number = 2
-batch_span = 7       # 7 days of data
+date_start_train= 20170608
+date_end_train = addDays(date_start_train, batch_span-1)
+batch_number = 1
+
 
 flow_train = batch_sep("flow", f_03, date_start_train, date_end_train, batch_number, batch_span, t)
 rain_train = batch_sep("rain", r_03, date_start_train, date_end_train, batch_number, batch_span, t)
 dwp_train = dry(dwp, batch_number)
 
 # testing
-date_start_test= 20170615
-date_end_test = 20170621
+date_start_test= 20170607
+date_end_test = addDays(date_start_test, batch_span-1)
 
 flow_test = batch_sep("flow", f_03, date_start_test, date_end_test, 1, batch_span, t)
+plot(flow_test)
+
 rain_test = batch_sep("rain", r_03, date_start_test, date_end_test, 1, batch_span, t)
 dwp_test = dry(dwp, 1)
 
 # paras for NN
-ann = Chain(Dense(2, 10, σ), Dense(10, 10, σ), Dense(10, 1))
-ann2 = Chain(Dense(2, 10, relu), Dense(10, 10, tanh),Dense(10, 10, tanh), Dense(10, 2, tanh), Dense(2, 1))
+#ann = Chain(Dense(2, 10, σ), Dense(10, 10, σ), Dense(10, 1))
+ann = Chain(Dense(2, 10, relu), Dense(10, 10, tanh),Dense(10, 10, tanh), Dense(10, 2, tanh), Dense(2, 1))
 p1,re = Flux.destructure(ann)
-n_itr = 10      # number of iteration for each batch
+n_itr = 250     # number of iteration for each batch
 fig = 1         # fig == 1: visualize the training result
 
 # tell me what you want to replace
-rep = "infil"
+rep = "dry"
 
 # train the model with neural network
-#russikon_nn("infil",flow_test, rain_test, dwp_test, u_update, p1, re, tspan, t, n_itr, p_ori, fig)
+u, para = russikon_nn("dry",flow_train, rain_train, dwp_train, u_update, p1, re, tspan, t, n_itr, p_ori, fig)
 
 # train the model with more data (minibatch)
-u, para = batchTrain(rep, flow_train, rain_train, dwp_train, ann, u_update, tspan, t, n_itr, p_ori, fig) # should pass the rain data and dry flow inside
+#epoch = 2
+#u, para = batchTrain(rep, epoch, flow_train, rain_train, dwp_train, ann, u_update, tspan, t, n_itr, p_ori, fig)
+# should pass the rain data and dry flow inside
 
 
 # evaluation of the model
 orig = russikon_eval("original", flow_test, rain_test, dwp_test, u_update, p1, re, tspan, t, p_ori)
-pred = russikon_eval(rep, flow_test, rain_test, dwp_test, u, para, re, tspan, t, p_ori)
+pred = russikon_eval(rep, flow_test, rain_test, dwp_test, u_update, para, re, tspan, t, p_ori)
+
+#pred = russikon_eval(rep, flow_test, rain_test, dwp_test, u_update, p1, re, tspan, t, p_ori)

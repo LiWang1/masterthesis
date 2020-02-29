@@ -23,6 +23,11 @@ In principle, AD performs a non-standard interpretation of a given computer prog
 3, Applicability
 4, Ease of implementation and readability
 
-## Scale of the complexibility
-1, the #para
-2, linear regression -> ANN -> ODE -> SWMM(MOD2) -> PDE
+## why not choosing continuous sensitive analysis (CSA)
+No additional code was required to be written by the AD method. Whereas for the CSA, whenever the user is changing the number of ODEs during an event, and events can change solver internals like the current integration time. CSA would require a separate implementation for each of these equations which could be costly to developer time.
+
+Adjoint sensitivity analysis is used to find the gradient of the solution with respect to some functional of the solution.
+
+CAS which saves a continous solution for the forward pass of the solution and utilizes its interpolant in order to calculate the requisite Jacobian and gradients for the backwards pass.
+
+It is equivalent to "backpropogation" or reverse-mode automatic differentiation of a differential equation.

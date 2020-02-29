@@ -1,5 +1,5 @@
 # batch train on the training data sets
-function batchTrain(model, obs_data, Rain, Dry, ann, u_update, tspan, ts, n_itr, ps, fig)
+function batchTrain(model, epoch, obs_data, Rain, Dry, ann, u0, tspan, ts, n_itr, ps, fig)
     # model: "dry" -- replace the dry weather pattern with NN;
     #        "infil" -- replace the infiltration with NN;
     #        "storage" -- replace the storage constant with NN; ~ not implemented yet
@@ -19,10 +19,13 @@ function batchTrain(model, obs_data, Rain, Dry, ann, u_update, tspan, ts, n_itr,
     # p1: paramters of the NN
     # re: the structure of the NN
 
-    num_batch = length(obs_data)
 
-    for i in 1:num_batch
-      u_update, p1 = russikon_nn(model, obs_data[i], Rain[i], Dry[i], u_update, p1, re, tspan, ts, n_itr, ps, fig)
+    num_batch = length(obs_data)
+    for j in 1:epoch
+      u_update = u0
+      for i in 1:num_batch
+        u_update, p1 = russikon_nn(model, obs_data[i], Rain[i], Dry[i], u_update, p1, re, tspan, ts, n_itr, ps, fig)
+      end
     end
 
     # return the final trained parameters
@@ -127,12 +130,12 @@ function russikon_eval(model, carryon, rain, dry, u0, p_ann, re, tspan, ts, ps)
   # "original"
   num_para = length(p_ann)
   function russikon_original(du, u, p, t)
-    k = ps[1:5]  # k: storage constant
-    theta = ps[6:10]  # theta: runoff coefficient
-    area = ps[11:15]  # area m^2
-    areaRatio = ps[16:20]
-    pt = ps[21:25]  # people eqivalent E
-    infiltration = ps[26]
+    k = p[1:5]           # k: storage constant
+    theta = p[6:10]      # theta: runoff coefficient
+    area = p[11:15]      # area m^2
+    areaRatio = p[16:20] #
+    pt = p[21:25]        # people eqivalent E
+    infiltration = p[26] # infiltration
     # B
     du[1] = (theta[1] * area[1] * rain(t) + pt[1]*dry(t)- u[1] + areaRatio[1]*infiltration)/k[1]
     # C
@@ -202,8 +205,8 @@ function russikon_eval(model, carryon, rain, dry, u0, p_ann, re, tspan, ts, ps)
   r2_pred = r_square(pred, flow_test)
 
   # visualization and comparison
-  pl = plot(ts, pred, label = "pred")
-  plot!(pl, ts, flow_test, label = "obs")
+  #pl = plot(ts, pred, label = "pred")
+  #plot!(pl, ts, flow_test, label = "obs")
   return r2_pred
 end
 
@@ -232,6 +235,19 @@ function addDays(date, diff)
   return new_date_
 end
 
+function minusDays(date1, date2)
+  # change to Date form
+  m = length(date1)
+  diff = zeros(m)
+  date2_ = Date(string(date2), "yyyymmdd")
+  for i in 1:m
+    date1_ = Date(string(date1[i]), "yyyymmdd")
+    diff[i] = (date1_ - date2_).value
+  end
+  return diff
+end
+
+
 # create the batches for rain and flow data
 function batch_sep(type, data, start, endt, num, span, ts)
   # type: "rain", "flow"
@@ -243,7 +259,7 @@ function batch_sep(type, data, start, endt, num, span, ts)
   if num == 1
     index = findall(x->(x<=endt && x>= start), data.int_date)
     batch_data = data[index,:]
-    batch_data.mins = batch_data.mins_hour.+1440*(batch_data.int_date.-start)
+    batch_data.mins = batch_data.mins_hour.+1440*minusDays(batch_data.int_date, start)
     interp = LinearInterpolation(batch_data.mins, batch_data.V3)
     if type == "flow"
       result = convert(Array{Float32, 1}, interp(ts))
@@ -257,7 +273,7 @@ function batch_sep(type, data, start, endt, num, span, ts)
       end_ = addDays(endt, span*(i-1))
       index_ = findall(x->(x<=end_ && x>= start_), data.int_date)
       batch_data_ = data[index_,:]
-      batch_data_.mins = batch_data_.mins_hour.+1440*(batch_data_.int_date.-start_)
+      batch_data_.mins = batch_data_.mins_hour.+1440*minusDays(batch_data_.int_date, start_)
       interp_ = LinearInterpolation(batch_data_.mins, batch_data_.V3)
       if type == "flow"
         interp_ = convert(Array{Float32, 1}, interp_(ts))
